@@ -44,7 +44,7 @@ def index():
             form = formInitializeTrip(request.form)
 
         # retorna pagina home
-        return render_template('home.html', titulo='Viagens', trip=trip, user=user, carTrip=carTrip, cars=cars,
+        return render_template('home.html', titulo='Viagens',nickname=session['nickname_usuario_logado'] , trip=trip, user=user, carTrip=carTrip, cars=cars,
                                form=form, action=action)
 
     # Caso Contrario vai para login

@@ -1,8 +1,11 @@
 {% extends "template.html" %}
 {% block conteudo %}
 <a class="btn btn-primary" hidden href ="{{ url_for('login', proxima=url_for('index')) }}"> Login </a>
-<a class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
-        <div>
+     <div class="float-right">
+         <a>Logado como: {{nickname}}</a>
+         <a  class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
+     </div>
+<div>
             <form class="FormularioInicioViagem " onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
                 <fieldset>
                       {{ form.csrf_token() }}

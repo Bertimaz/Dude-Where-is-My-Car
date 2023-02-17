@@ -52,6 +52,9 @@ td {
 .formularioImagem {
     margin-right: 16px
 }
+.float-right{
+    float: right
+}
 
 .buttons {
     margin-top: 16px
