@@ -1,0 +1,58 @@
+{% extends "template.html" %}
+{% block conteudo %}
+<a class="btn btn-primary" hidden href ="{{ url_for('login', proxima=url_for('index')) }}"> Login </a>
+<a class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
+        <div>
+           <p>Busca Viagem</p>
+        </div>
+<form class="FormSearchTripByDate" action="{{ url_for('searchTrip') }}"method="post" enctype="multipart/form-data"
+      <fieldset>
+            {{ form.csrf_token() }}
+          <div class="dropdown">
+                         <label for="cars"> Escolha um carro:</label>
+                         <select name="cars" id="cars">
+                              {% for car in cars %}
+                             <option value={{car.plate}} > {{car.name}}</option>
+                        {% endfor %}
+                         </select>
+                    </div>
+          <input type = "date">
+           {{form.searchTrip(class = "btn btn-primary")}}
+      </fieldset>
+
+<table class="table table-striped table-responsive table-bordered">
+            <thead class="thead-default">
+                <tr>
+                    <th>Motorista</th>
+                    <th>Endereço inicial</th>
+                    <th>Inicio</th>
+                    <th>Endereço final</th>
+                    <th>Fim</th>
+                    <th>Usuario</th>
+                    <th>Carro</th>
+                </tr>
+            </thead>
+            <tbody>
+             {% for trip in trips %}
+
+
+                <tr>
+                    <td>{{trip.name}}</td>
+                    <td>{{trip.initialAddress}}</td>
+                    <td>{{trip.initialTime}}</td>
+                    <td>{{trip.endAddress}}</td>
+                    <td>{{trip.endTime}}</td>
+                    <td>{{trip.userNickname}}</td>
+                    <td>{{trip.carPlate}}</td>
+
+                </tr>
+             {% endfor %}
+            </tbody>
+        </table>
+
+
+
+
+
+
+{% endblock %}

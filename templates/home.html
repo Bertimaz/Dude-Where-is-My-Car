@@ -1,0 +1,62 @@
+{% extends "template.html" %}
+{% block conteudo %}
+<a class="btn btn-primary" hidden href ="{{ url_for('login', proxima=url_for('index')) }}"> Login </a>
+<a class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
+        <div>
+            <form class="FormularioInicioViagem " onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
+                <fieldset>
+                      {{ form.csrf_token() }}
+                    <input type="hidden" name="userNickname" value="{{ user.nickname }}">
+                    <input type="hidden" name="initialAddress" value="Dummy Address">
+                    <input type="hidden" id="latitude" name="latitude" >
+                    <input type="hidden" id="longitude" name="longitude" >
+                    <input type="hidden" id="geoLocationError" name="geoLocationError" >
+
+
+
+                    <div class="dropdown">
+                         <label for="cars"> Escolha um carro:</label>
+                         <select name="cars" id="cars" onchange="{{url_for('indexCar')}}">
+                              {% for car in cars %}
+                             <option value={{car.plate}} > {{car.name}}</option>
+                        {% endfor %}
+                         </select>
+                    </div>
+                    <a class="buttons" >
+                        {{form.updateTrip(class = "btn btn-primary")}}
+                    </a>
+                </fieldset>
+            </form>
+        </div>
+<div>
+    <a hidden class="btn btn-primary" href ="{{ url_for('searchTrip') }}" > Buscar Viagem </a>
+</div>
+
+
+
+        <table class="table table-striped table-responsive table-bordered">
+            <thead class="thead-default">
+                <tr>
+                    <th>Motorista</th>
+                    <th>Endereço inicial</th>
+                    <th>Inicio</th>
+                    <th>Endereço final</th>
+                    <th>Fim</th>
+                    <th>Carro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{user.name}}</td>
+                    <td>{{trip.initialAddress}}</td>
+                    <td>{{trip.initialTime}}</td>
+                    <td>{{trip.endAddress}}</td>
+                    <td>{{trip.endTime}}</td>
+                    <td>{{carTrip.name}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+{% endblock %}

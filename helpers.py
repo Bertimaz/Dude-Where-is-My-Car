@@ -1,0 +1,158 @@
+import json
+
+from carro_app import app
+from flask_wtf import FlaskForm
+from wtforms import StringField, validators, SubmitField, SelectField, PasswordField
+from models import Users, UsersCars, Cars, Trips
+import requests
+import config
+from sqlalchemy import text
+
+
+def isLastTripOpen(carPlate):
+    lastTrip = Trips.query.filter_by(carPlate=carPlate).order_by(Trips.initialTime.desc()).first()
+    if (lastTrip.endAddress is None) and (lastTrip.endTime is None):
+        return True
+    return False
+
+
+def retrieveTripsByDateAndCar(carPlate,date):
+    pass
+    # select *
+    # from trips  WHERE
+    # date(initialTime) = '2022-11-10'
+    # and carPlate = 'FLI-4871'
+
+    #sqlStatement=text()
+
+
+class FormularioEscolheCarro(FlaskForm):
+    name = SelectField(label='Escolha o carro')
+
+
+class FormularioUsuarioCadastro(FlaskForm):
+    name = StringField('Name',
+                       [validators.data_required(message="Forneca o Nome do Usuário"),
+                        validators.Length(min=1, max=20)])
+
+    nickname = StringField('Nickname',
+                           [validators.data_required(message="Forneca o Nickname do Usuário"),
+                            validators.Length(min=1, max=15)])
+
+    password = StringField('Password',
+                           [validators.data_required(message="Forneça o nome do Usuário"),
+                            validators.Length(min=1, max=20)])
+
+    email = StringField('E-mail',
+                        [validators.data_required(message="Forneça o E-Mail do Usuário"),
+                         validators.Length(min=1, max=100)])
+
+    login = SubmitField('Login')
+
+
+class FormularioUsuarioLogin(FlaskForm):
+    nickname = StringField('Nickname',
+                           [validators.data_required(message="Forneca o Nickname do Usuário"),
+                            validators.Length(min=1, max=15)])
+
+    password = PasswordField('Password',
+                             [validators.data_required(message="Forneça o nome do Usuário"),
+                              validators.Length(min=1, max=20)])
+    login = SubmitField('Login')
+
+
+class getCar():
+    def __init__(self, nickname):
+        trip = Trips.query.filter_by(user_nickname=nickname).order_by(Trips.initialTime.desc()).first()
+        user = Users.query.filter_by(nickname='Bertimaz').first()  # não ta achando usuario
+        usersCars = UsersCars.query.filter_by(userNickname='Bertimaz')
+        cars = []
+        for usercar in usersCars:
+            car = Cars.query.filter_by(plate=usercar.carPlate).first()
+            cars.append(car)
+
+
+class formInitializeTrip(FlaskForm):
+    nickname = StringField('Nickname',
+                           [validators.DataRequired(message="Forneca o Nickname do Usuário"),
+                            validators.Length(min=1, max=15)])
+    carPlate = StringField('Placa do Carro',
+                           [validators.DataRequired(message="Placa do carro"),
+                            validators.Length(min=1, max=10)])
+    initialAddress = StringField('Endereço Inicial',
+                                 [validators.DataRequired(message="Endereço Inicial"),
+                                  validators.Length(min=1, max=100)])
+    InitialTime = StringField('Horario de Partida',
+                              [validators.DataRequired(message="Horario de Partida"),
+                               validators.Length(min=1, max=50)])
+
+    updateTrip = SubmitField('Iniciar Viagem')
+    searchTrip = SubmitField('Buscar Viagem')
+
+
+class formEndTrip(FlaskForm):
+    nickname = StringField('Nickname',
+                           [validators.DataRequired(message="Forneca o Nickname do Usuário"),
+                            validators.Length(min=1, max=15)])
+    carPlate = StringField('Placa do Carro',
+                           [validators.DataRequired(message="Placa do carro"),
+                            validators.Length(min=1, max=10)])
+    initialAddress = StringField('Endereço Inicial',
+                                 [validators.DataRequired(message="Endereço Inicial"),
+                                  validators.Length(min=1, max=100)])
+    InitialTime = StringField('Horario de Partida',
+                              [validators.DataRequired(message="Horario de Partida"),
+                               validators.Length(min=1, max=50)])
+
+    updateTrip = SubmitField('Finalizar Viagem')
+
+
+class formSearchTripByDate(FlaskForm):
+    searchTrip = SubmitField('Buscar Viagem')
+
+
+
+class reverseGeocode():
+    def __init__(self, lat, longitude):
+        self.lat = lat
+        self.longitude = longitude
+        self.error = 0
+        self.formattedAddress = 'Endereço Indisponível'
+        base = "https://maps.googleapis.com/maps/api/geocode/json?"
+        params = "latlng={lat},{lon}&key={API_KEY}".format(
+            lat=self.lat,
+            lon=self.longitude,
+            API_KEY=config.GOOGLEMAPS_API_KEY
+        )
+
+        self.url = "{base}{params}".format(base=base, params=params)
+        app.logger.info('Connecting to %s.' %self.url)
+
+        try:
+            self.response = requests.get(self.url)
+            if self.response.json()['status'] == 'OK':
+                app.logger.info('Connection to %s. Status: %s'%(self.url, self.response.json()['status']))
+                #     do stuff
+                try:
+                    self.formattedAddress = str(self.response.json()['results'][0]['formatted_address'])
+                except IndexError as e:
+                    app.logger.warning('Formating Address Error: %s' %e)
+                    self.error = 2
+                    self.formattedAddress = 'error2'
+                except:
+                    app.logger.warning('Formating Address Error: Unknown Error')
+                    self.error = 3
+                    self.formattedAddress = 'error3'
+            else:
+                app.logger.warning('Google Api Connection Error. Status: %s',self.response.json()['status'])
+        except requests.ConnectionError as e:
+            self.error = 1
+            self.formattedAddress = 'error1'
+            app.logger.warning('Google Api Connection Error. %s',e)
+
+        finally:
+            self.response.close()
+            app.logger.info('Connection to %s closed.' % self.url)
+
+    def __str__(self):
+        return self.formattedAddress
