@@ -1,0 +1,7 @@
+/venv/
+/.idea/
+/config.py
+/carros_app_log.log
+/example.log
+/prepara_bd.py
+/testes.py
