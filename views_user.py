@@ -9,11 +9,12 @@ def login():
     proxima = request.args.get('proxima')
     form = FormularioUsuarioLogin()
 
-    if 'nome_usuario_logado' in session and session['nome_usuario_logado'] is not None:
-        flash(session.get('nome_usuario_logado') + ' Já esta logado!')
+
+    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+        flash(session.get('nickname_usuario_logado') + ' Já esta logado!')
         return redirect(proxima)
 
-    print('proxima= ' + str(proxima))
+
     return render_template('/login.html', proxima=proxima, form=form)
 
 
@@ -21,6 +22,9 @@ def login():
 def autenticar():
     #inicializa formulario
     form=FormularioUsuarioLogin(request.form)
+    #log
+    app.logger.info('Autenticando usuario %s' % (form.nickname.data))
+
     #Encontra usuário pelo nickname
     user = Users.query.filter_by(nickname=form.nickname.data).first()
     #Se existe o user confirma a senha
@@ -40,6 +44,10 @@ def autenticar():
 
 @app.route('/logout')
 def logout():
-    session['nome_usuario_logado'] = None
+    # log
+    app.logger.info('Usuario deslogado %s' % (session['nickname_usuario_logado']))
+    session['nickname_usuario_logado'] = None
     flash('Logout realizado com sucesso')
-    return redirect(url_for('login'))
+    return redirect(url_for('login',proxima=url_for('index')))
+
+
