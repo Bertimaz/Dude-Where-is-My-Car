@@ -19,12 +19,15 @@ def login():
 
 @app.route('/autenticar',methods=['POST',])
 def autenticar():
+    #inicializa formulario
     form=FormularioUsuarioLogin(request.form)
+    #Encontra usuário pelo nickname
     user = Users.query.filter_by(nickname=form.nickname.data).first()
+    #Se existe o user confirma a senha
     if user:
         password = check_password_hash((user.password), form.password.data)
+        #Se a senha confere loga o usuario, imprime mensagem de confirmação e vai para a próxima pagins
         if password:
-            print("if password")
             session['nickname_usuario_logado'] = user.nickname
             flash(user.nickname + ' logou com sucesso!')
             proxima_pagina = request.form['proxima']
