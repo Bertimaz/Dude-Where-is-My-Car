@@ -66,9 +66,14 @@ def indexCar():
         trip = Trips.query.filter_by(userNickname=nickname).order_by(Trips.initialTime.desc()).first()
 
         # Inicializa carros liberados para usuario
+        #Cria objeto carro a partir da placa do carro da ultima viagem
         carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
+        #Cria usuario a partir do nickname
         user = Users.query.filter_by(nickname=nickname).first()
+        #Buscar carros do usuario a partir do nickname
         usersCars = UsersCars.query.filter_by(userNickname=nickname)
+
+        #Adiciona carros disponiveis para o usuario na lista cars
         cars = []
         for usercar in usersCars:
             car = Cars.query.filter_by(plate=usercar.carPlate).first()
