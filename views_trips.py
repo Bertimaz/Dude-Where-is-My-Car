@@ -47,15 +47,11 @@ def index():
         else:
             action = 'tripInitializer'
             form = formInitializeTrip(request.form)
-
-
             mapsLink="https://www.google.com.br/maps/search/{address}".format(
                 address=trip.endAddress.replace("- ","").replace(" ","+")
         )
-        print (trip.endAddress)
-        print(trip.endAddress.replace("- ","").replace(" ","+"))
+            print(mapsLink)
 
-        # https://www.google.com.br/maps/search/R.+Mourato+Coelho,+1430+-+Pinheiros/@-23.5556812,-46.6949273,17z
         # retorna pagina home
         return render_template('home.html', titulo='Viagens',nickname=session['nickname_usuario_logado'] , trip=trip, user=user, carTrip=carTrip, cars=cars,
                                form=form, action=action,mapsLink=mapsLink)
@@ -118,15 +114,21 @@ def tripInitializer():
     if isLogged(session):
         # Pega dados do formulario e do usuario
         nickname = session['nickname_usuario_logado']
-        geolocationStatus=request.form.get("geoLocationError")
+        geoLocationStatus=request.form.get("geoLocationError")
         initialLatitude = request.form.get('latitude')
         initialLongitude = request.form.get('longitude')
 
+        app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
+        #Se não tiver informação do geoLocation voltar para home
+        if geoLocationStatus==None or geoLocationStatus=="":
+            flash('Problema com a localização do navegador. Erro desconhecido')
+            app.logger.info('Browser Geolocation error:' + str(geoLocationStatus))
+            return redirect('/')
 
         #Se tiver probemas com a geolocalização ir para home
-        if geolocationStatus==1 or geolocationStatus==2:
-            flash('Problema com a localização do navegador. Erro nº= %d!' % geolocationStatus)
-            app.logger.info('Browser Geoocation error: %d' % (geolocationStatus))
+        if geoLocationStatus==1 or geoLocationStatus==2:
+            flash('Problema com a localização do navegador. Erro nº= %d!' % geoLocationStatus)
+            app.logger.info('Browser Geoocation error: %d' % (geoLocationStatus))
             return redirect('/')
 
         # Se não tem probemas com a localização, mandas as informações para o logger
@@ -138,7 +140,7 @@ def tripInitializer():
                     app.logger.info('Recovering Address from coordinates: %s,%s' % (initialLatitude, initialLongitude))
                 except:
                     app.logger.info('Coordinates invalid')
-                    flash('Problema com a localização do navegador. Erro nº= %d!' % geolocationStatus)
+                    flash('Problema com a localização do navegador. Erro nº= %d!' % geoLocationStatus)
                     return redirect('/')
 
 
@@ -182,10 +184,20 @@ def tripEnder():
         nickname = session['nickname_usuario_logado']
         finalLatitude = request.form.get('latitude')
         finalLongitude = request.form.get('longitude')
+        geoLocationStatus = request.form.get("geoLocationError")
+
+        app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
+        # Se não tiver informação do geoLocation voltar para home
+        if geoLocationStatus == None or geoLocationStatus == "":
+            flash('Problema com a localização do navegador. Erro desconhecido')
+            app.logger.info('Browser Geolocation error:' + str(geoLocationStatus))
+            return redirect('/')
 
         # Salva endereço a partir das coordenadas
         print("latitude:%s longitude:%s", finalLatitude, finalLongitude)
         endAddress = helpers.reverseGeocode(finalLatitude, finalLongitude)
+
+
 
         # Checa erro no geocodding
         if endAddress.error != 0:

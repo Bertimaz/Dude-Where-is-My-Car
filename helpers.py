@@ -7,6 +7,7 @@ from models import Users, UsersCars, Cars, Trips
 import requests
 import config
 import pytz
+
 from datetime import datetime
 from models import Trips, Users, Cars, UsersCars, db
 from sqlalchemy import text
@@ -155,8 +156,11 @@ class reverseGeocode():
             app.logger.warning('Google Api Connection Error. %s',e)
 
         finally:
-            self.response.close()
-            app.logger.info('Connection to %s closed.' % self.url)
+            try:
+                self.response.close()
+                app.logger.info('Connection to %s closed.' % self.url)
+            except:
+                pass
 
     def __str__(self):
         return self.formattedAddress
