@@ -10,7 +10,7 @@ def login():
     form = FormularioUsuarioLogin()
 
 
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    if isLogged(session):
         flash(session.get('nickname_usuario_logado') + ' Já esta logado!')
         return redirect(proxima)
 

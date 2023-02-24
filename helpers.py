@@ -130,6 +130,7 @@ class reverseGeocode():
 
         try:
             self.response = requests.get(self.url)
+            # Se resposta ok salva o endereço
             if self.response.json()['status'] == 'OK':
                 app.logger.info('Connection to %s. Status: %s'%(self.url, self.response.json()['status']))
                 #     do stuff
@@ -156,3 +157,9 @@ class reverseGeocode():
 
     def __str__(self):
         return self.formattedAddress
+
+def isLogged(session):
+    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+        return True
+    else:
+        return False

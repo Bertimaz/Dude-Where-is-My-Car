@@ -17,19 +17,22 @@ from flask_bcrypt import check_password_hash
 @app.route('/')
 def index():
     # se usuario logado abre pagina home
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    if isLogged(session):
 
         # Inicializa informações do usuario
         nickname = session['nickname_usuario_logado']
 
         # Inicializa ultima viagem do usuario corrigir para ultima viagem do carro selecionado
         trip = Trips.query.filter_by(userNickname=nickname).order_by(Trips.initialTime.desc()).first()
+
+        # Inicializa informações do carro da ultima viagem
         carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
 
         # Inicializa carros liberados para usuario
         user = Users.query.filter_by(nickname=nickname).first()
         usersCars = UsersCars.query.filter_by(userNickname=nickname)
         cars = []
+
         for usercar in usersCars:
             car = Cars.query.filter_by(plate=usercar.carPlate).first()
             cars.append(car)
@@ -57,7 +60,7 @@ def indexCar():
     form1 = formInitializeTrip
     print(form1.carPlate.data)
     # se usuario logado abre pagina home
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    if isLogged(session):
 
         # Inicializa informações do usuario
         nickname = session['nickname_usuario_logado']
@@ -101,55 +104,65 @@ def indexCar():
 def tripInitializer():
     form = formInitializeTrip
 
-    # Se usuario Logado
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    # Se usuario Logado Salvar viagem
+    if isLogged(session):
         # Pega dados do formulario e do usuario
-
         nickname = session['nickname_usuario_logado']
+        geolocationStatus=request.form.get("geoLocationError")
         initialLatitude = request.form.get('latitude')
         initialLongitude = request.form.get('longitude')
-        try:
-            app.logger.info('Recovering Address from coordinates: %f,%f'% (initialLatitude, initialLongitude))
-        except:
-            try:
-                app.logger.info('Recovering Address from coordinates: %s,%s' % (initialLatitude, initialLongitude))
-            except:
-                app.logger.info('Coordinates invalid')
 
 
-
-        # Salva endereço a partir das coordenadas
-        initialAddress = helpers.reverseGeocode(initialLatitude, initialLongitude)
-
-        # Checa erro no geocodding
-        if initialAddress.error != 0:
-            flash('Geocoding Error: Try Again Later')
+        #Se tiver probemas com a geolocalização ir para home
+        if geolocationStatus==1 or geolocationStatus==2:
+            flash('Problema com a localização do navegador. Erro nº= %d!' % geolocationStatus)
+            app.logger.info('Browser Geoocation error: %d' % (geolocationStatus))
             return redirect('/')
 
+        # Se não tem probemas com a localização, mandas as informações para o logger
         else:
-            # cria a trip e sobe na DB
-            trip = Trips(initialAddress=initialAddress.__str__(), initialTime=datetime.now(), userNickname=nickname,
-                         carPlate=request.form.get("cars"))
-            db.session.add(trip)
-            db.session.commit()
-            app.logger.info('New Trip Uploaded. %s' % initialAddress)
-
-            # Imprime mensagem
-            flash('Viagem Iniciada!')
-
-            # Abre a home novamente
-            return redirect('/')
+            try:
+                app.logger.info('Recovering Address from coordinates: %f,%f'% (initialLatitude, initialLongitude))
+            except:
+                try:
+                    app.logger.info('Recovering Address from coordinates: %s,%s' % (initialLatitude, initialLongitude))
+                except:
+                    app.logger.info('Coordinates invalid')
 
 
+
+            # Salva endereço a partir das coordenadas
+            initialAddress = helpers.reverseGeocode(initialLatitude, initialLongitude)
+
+            # Checa erro no geocodding
+            if initialAddress.error != 0:
+                flash('Geocoding Error: Try Again Later')
+                return redirect('/')
+
+            else:
+                # cria a trip e sobe na DB
+                trip = Trips(initialAddress=initialAddress.__str__(), initialTime=datetime.now(), userNickname=nickname,
+                             carPlate=request.form.get("cars"))
+                db.session.add(trip)
+                db.session.commit()
+                app.logger.info('New Trip Uploaded. %s' % initialAddress)
+
+                # Imprime mensagem
+                flash('Viagem Iniciada!')
+
+                # Abre a home novamente
+                return redirect('/')
+
+    #Se usuario não logado voltar para home
     else:
         flash('Você precisa estar logado para iniciar uma viagem!')
         return redirect('/')
 
-
+#Como copiar codigo da trip initializer para atualizar mensagens de erro?
 @app.route('/trip-ender', methods=['POST', ])
 def tripEnder():
     # Se usuario Logado
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    if isLogged(session):
         # Pega dados do formulario e do usuario
         form = formInitializeTrip
         nickname = session['nickname_usuario_logado']
@@ -193,11 +206,11 @@ def searchTrip():
     print(trip.initialAddress)
 
     # se usuario logado abre pagina home
-    if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
+    if isLogged(session):
 
         # Inicializa informações do usuario
         nickname = session['nickname_usuario_logado']
-
+        #Inicializa Formulario
         form = formSearchTripByDate()
 
         # Inicializa carros liberados para usuario
