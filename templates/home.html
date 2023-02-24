@@ -6,7 +6,7 @@
          <a  class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
      </div>
 <div>
-            <form class="FormularioInicioViagem " onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
+            <form class="FormularioInicioViagem" onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
                 <fieldset>
                       {{ form.csrf_token() }}
                     <input type="hidden" name="userNickname" value="{{ user.nickname }}">
@@ -37,25 +37,29 @@
 
 
 
-        <table class="table table-striped table-responsive table-bordered">
-            <thead class="thead-default">
+        <table class="table  table-responsive ">
+            <thead class="thead-dark">
                 <tr>
-                    <th>Motorista</th>
-                    <th>Endereço inicial</th>
-                    <th>Inicio</th>
-                    <th>Endereço final</th>
-                    <th>Fim</th>
-                    <th>Carro</th>
+                    <th scope="col">Motorista</th>
+                    <th scope="col">Endereço inicial</th>
+                    <th scope="col">Inicio</th>
+                    <th scope="col">Endereço final</th>
+                    <th scope="col">Fim</th>
+                    <th scope="col">Carro</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{user.name}}</td>
-                    <td>{{trip.initialAddress}}</td>
-                    <td>{{trip.initialTime}}</td>
-                    <td>{{trip.endAddress}}</td>
-                    <td>{{trip.endTime}}</td>
-                    <td>{{carTrip.name}}</td>
+                    <td class="first-row" data-label="Motorista">{{user.name}}</td>
+                    <td data-label="Endereço Inicial">{{trip.initialAddress}}</td>
+                    <td data-label="Saída">{{trip.initialTime}}</td>
+                    <td data-label="Endereço Final" >
+                        <a href=[{{mapsLink}}>
+                        {{trip.endAddress}}
+                        </a>
+                    </td>
+                    <td data-label="Chegada">{{trip.endTime}}</td>
+                    <td data-label="Carro">{{carTrip.name}}</td>
                 </tr>
             </tbody>
         </table>

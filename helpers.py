@@ -6,6 +6,9 @@ from wtforms import StringField, validators, SubmitField, SelectField, PasswordF
 from models import Users, UsersCars, Cars, Trips
 import requests
 import config
+import pytz
+from datetime import datetime
+from models import Trips, Users, Cars, UsersCars, db
 from sqlalchemy import text
 
 
@@ -163,3 +166,25 @@ def isLogged(session):
         return True
     else:
         return False
+
+
+def endTrip(timeZoneName,carplate, endAddress):
+    # Configura Timezone
+    currentTz = pytz.timezone(timeZoneName)
+    #Formating Date Time
+    formattedDateTime=datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
+    # recupera a trip adiciona informações finais e sobe na DB
+    trip = Trips.query.filter_by(carPlate=carplate).order_by(Trips.initialTime.desc()).first()
+    trip.endAddress = endAddress.__str__()
+    trip.endTime = formattedDateTime
+    db.session.commit()
+
+def initiateTrip(initialAddress, timeZoneName,nickname,carplate):
+    #formating dateTime
+    currentTz = pytz.timezone(timeZoneName)
+    formattedDateTime=datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
+    #Creating new Trip and uploading to DB
+    trip = Trips(initialAddress=initialAddress.__str__(), initialTime=formattedDateTime, userNickname=nickname,
+                 carPlate=carplate)
+    db.session.add(trip)
+    db.session.commit()

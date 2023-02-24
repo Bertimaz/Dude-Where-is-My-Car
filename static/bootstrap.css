@@ -2115,6 +2115,12 @@ progress {
   border-color: #373b3e;
 }
 
+.table .thead-dark th {
+  color: #fff;
+  background-color: #212529;
+  border-color: #32383e;
+}
+
 .table-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

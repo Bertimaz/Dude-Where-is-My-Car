@@ -9,6 +9,7 @@ from helpers import *
 import googlemaps
 import time
 import helpers
+import pytz
 
 from flask_bcrypt import check_password_hash
 
@@ -42,13 +43,22 @@ def index():
         if isLastTripOpen:
             action = 'tripEnder'
             form = formEndTrip(request.form)
+            mapsLink=""
         else:
             action = 'tripInitializer'
             form = formInitializeTrip(request.form)
 
+
+            mapsLink="https://www.google.com.br/maps/search/{address}".format(
+                address=trip.endAddress.replace("- ","").replace(" ","+")
+        )
+        print (trip.endAddress)
+        print(trip.endAddress.replace("- ","").replace(" ","+"))
+
+        # https://www.google.com.br/maps/search/R.+Mourato+Coelho,+1430+-+Pinheiros/@-23.5556812,-46.6949273,17z
         # retorna pagina home
         return render_template('home.html', titulo='Viagens',nickname=session['nickname_usuario_logado'] , trip=trip, user=user, carTrip=carTrip, cars=cars,
-                               form=form, action=action)
+                               form=form, action=action,mapsLink=mapsLink)
 
     # Caso Contrario vai para login
     else:
@@ -128,6 +138,8 @@ def tripInitializer():
                     app.logger.info('Recovering Address from coordinates: %s,%s' % (initialLatitude, initialLongitude))
                 except:
                     app.logger.info('Coordinates invalid')
+                    flash('Problema com a localização do navegador. Erro nº= %d!' % geolocationStatus)
+                    return redirect('/')
 
 
 
@@ -140,14 +152,13 @@ def tripInitializer():
                 return redirect('/')
 
             else:
-                # cria a trip e sobe na DB
-                trip = Trips(initialAddress=initialAddress.__str__(), initialTime=datetime.now(), userNickname=nickname,
-                             carPlate=request.form.get("cars"))
-                db.session.add(trip)
-                db.session.commit()
-                app.logger.info('New Trip Uploaded. %s' % initialAddress)
 
-                # Imprime mensagem
+                currentTzName="America/Sao_Paulo"
+                # cria a trip e sobe na DB
+                initiateTrip(initialAddress,currentTzName,nickname,request.form.get("cars"))
+
+                # Imprime mensagem e escreve no log
+                app.logger.info('New Trip Uploaded. %s' % initialAddress)
                 flash('Viagem Iniciada!')
 
                 # Abre a home novamente
@@ -159,6 +170,9 @@ def tripInitializer():
         return redirect('/')
 
 #Como copiar codigo da trip initializer para atualizar mensagens de erro?
+## Mandar mensagem no grupo
+### Send a WhatsApp Message to a Group instantly
+###pywhatkit.sendwhatmsg_to_group_instantly("AB123CDEFGHijklmn", "Hey All!")
 @app.route('/trip-ender', methods=['POST', ])
 def tripEnder():
     # Se usuario Logado
@@ -179,17 +193,12 @@ def tripEnder():
             return redirect('/')
 
         else:
-            # recupera a trip adiciona informações finais e sobe na DB
-            trip = Trips.query.filter_by(carPlate=request.form.get("cars")).order_by(Trips.initialTime.desc()).first()
-            trip.endAddress = endAddress.__str__()
-            trip.endTime = datetime.now()
-            db.session.commit()
-
+            # Configura Timezone e encerra viagem
+            currentTzName="America/Sao_Paulo"
+            endTrip(currentTzName,request.form.get("cars"),endAddress.__str__())
+            # Imprime mensagem e sobe no log
             app.logger.info('New Trip ended. %s' % endAddress)
-
-            # Imprime mensagem
             flash('Viagem Finalizada!')
-
             # Abre a home novamente
             return redirect('/')
 
