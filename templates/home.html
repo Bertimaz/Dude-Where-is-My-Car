@@ -9,7 +9,7 @@
             <form class="" onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
                 <fieldset>
                       {{ form.csrf_token() }}
-                    <input type="hidden" name="userNickname" value="{{ user.nickname }}">
+                    <input type="hidden" name="userNickname" value="{{  user.nickname }}">
                     <input type="hidden" name="initialAddress" value="Dummy Address">
                     <input type="hidden" id="latitude" name="latitude" >
                     <input type="hidden" id="longitude" name="longitude" >
@@ -50,7 +50,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td class="first-row" data-label="Motorista">{{trip.userNickname}}</td>
+                    <td class="first-row" data-label="Motorista">{{driverName}}</td>
                     <td data-label="Endereço Inicial">{{trip.initialAddress}}</td>
                     <td data-label="Saída">{{trip.initialTime}}</td>
                     <td data-label="Endereço Final" >

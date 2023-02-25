@@ -54,9 +54,11 @@ def index():
         )
             print(mapsLink)
 
+        driverName=Users.query.filter_by(nickname=trip.userNickname).first().name
+
         # retorna pagina home
         return render_template('home.html', titulo='Viagens',nickname=session['nickname_usuario_logado'] , trip=trip, user=user, carTrip=carTrip, cars=cars,
-                               form=form, action=action,mapsLink=mapsLink)
+                               form=form, action=action,mapsLink=mapsLink,driverName=driverName)
 
     # Caso Contrario vai para login
     else:
