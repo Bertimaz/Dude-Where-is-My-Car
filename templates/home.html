@@ -6,7 +6,7 @@
          <a  class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
      </div>
 <div>
-            <form class="FormularioInicioViagem" onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
+            <form class="" onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
                 <fieldset>
                       {{ form.csrf_token() }}
                     <input type="hidden" name="userNickname" value="{{ user.nickname }}">
@@ -50,7 +50,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td class="first-row" data-label="Motorista">{{user.name}}</td>
+                    <td class="first-row" data-label="Motorista">{{trip.userNickname}}</td>
                     <td data-label="Endereço Inicial">{{trip.initialAddress}}</td>
                     <td data-label="Saída">{{trip.initialTime}}</td>
                     <td data-label="Endereço Final" >
