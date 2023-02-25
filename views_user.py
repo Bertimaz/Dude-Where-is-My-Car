@@ -3,7 +3,7 @@ from carro_app import app
 from helpers import FormularioUsuarioLogin
 from models import Users
 from flask_bcrypt import check_password_hash
-from helpers import *
+from helpers import isLogged
 
 @app.route('/login')
 def login():

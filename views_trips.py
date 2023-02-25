@@ -23,12 +23,6 @@ def index():
         # Inicializa informações do usuario
         nickname = session['nickname_usuario_logado']
 
-        # Inicializa ultima viagem do usuario corrigir para ultima viagem do carro selecionado
-        trip = Trips.query.filter_by(userNickname=nickname).order_by(Trips.initialTime.desc()).first()
-
-        # Inicializa informações do carro da ultima viagem
-        carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
-
         # Inicializa carros liberados para usuario
         user = Users.query.filter_by(nickname=nickname).first()
         usersCars = UsersCars.query.filter_by(userNickname=nickname)
@@ -37,6 +31,14 @@ def index():
         for usercar in usersCars:
             car = Cars.query.filter_by(plate=usercar.carPlate).first()
             cars.append(car)
+
+        # Inicializa ultima viagem do usuario corrigir para ultima viagem do carro selecionado
+        trip = Trips.query.filter_by(carPlate=cars[0].plate).order_by(Trips.initialTime.desc()).first()
+
+        # Inicializa informações do carro da ultima viagem
+        carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
+
+
 
         # Inicializa formularios adequados
         isLastTripOpen = helpers.isLastTripOpen(carTrip.plate)
