@@ -38,27 +38,26 @@ def index():
         # Inicializa informações do carro da ultima viagem
         carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
 
-
-
         # Inicializa formularios adequados
         isLastTripOpen = helpers.isLastTripOpen(carTrip.plate)
         if isLastTripOpen:
             action = 'tripEnder'
             form = formEndTrip(request.form)
-            mapsLink=""
+            mapsLink = ""
         else:
             action = 'tripInitializer'
             form = formInitializeTrip(request.form)
-            mapsLink="https://www.google.com.br/maps/search/{address}".format(
-                address=trip.endAddress.replace("- ","").replace(" ","+")
-        )
-            print(mapsLink)
+            mapsLink = "redirect-external/?url=" + "https://www.google.com.br/maps/search/{address}".format(
+                address=trip.endAddress.replace("- ", "").replace(" ", "+")
+            )
+            print('maps link= '+ mapsLink)
 
-        driverName=Users.query.filter_by(nickname=trip.userNickname).first().name
+        driverName = Users.query.filter_by(nickname=trip.userNickname).first().name
 
         # retorna pagina home
-        return render_template('home.html', titulo='Viagens',nickname=session['nickname_usuario_logado'] , trip=trip, user=user, carTrip=carTrip, cars=cars,
-                               form=form, action=action,mapsLink=mapsLink,driverName=driverName)
+        return render_template('home.html', titulo='Viagens', nickname=session['nickname_usuario_logado'], trip=trip,
+                               user=user, carTrip=carTrip, cars=cars,
+                               form=form, action=action, mapsLink=mapsLink, driverName=driverName)
 
     # Caso Contrario vai para login
     else:
@@ -79,14 +78,14 @@ def indexCar():
         trip = Trips.query.filter_by(userNickname=nickname).order_by(Trips.initialTime.desc()).first()
 
         # Inicializa carros liberados para usuario
-        #Cria objeto carro a partir da placa do carro da ultima viagem
+        # Cria objeto carro a partir da placa do carro da ultima viagem
         carTrip = Cars.query.filter_by(plate=trip.carPlate).first()
-        #Cria usuario a partir do nickname
+        # Cria usuario a partir do nickname
         user = Users.query.filter_by(nickname=nickname).first()
-        #Buscar carros do usuario a partir do nickname
+        # Buscar carros do usuario a partir do nickname
         usersCars = UsersCars.query.filter_by(userNickname=nickname)
 
-        #Adiciona carros disponiveis para o usuario na lista cars
+        # Adiciona carros disponiveis para o usuario na lista cars
         cars = []
         for usercar in usersCars:
             car = Cars.query.filter_by(plate=usercar.carPlate).first()
@@ -118,20 +117,20 @@ def tripInitializer():
     if isLogged(session):
         # Pega dados do formulario e do usuario
         nickname = session['nickname_usuario_logado']
-        geoLocationStatus=request.form.get("geoLocationError")
+        geoLocationStatus = request.form.get("geoLocationError")
         initialLatitude = request.form.get('latitude')
         initialLongitude = request.form.get('longitude')
 
         app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
 
-        #Se não tiver informação do geoLocation voltar para home
-        if geoLocationStatus==None or geoLocationStatus=="":
+        # Se não tiver informação do geoLocation voltar para home
+        if geoLocationStatus == None or geoLocationStatus == "":
             flash('Problema com a localização do navegador. Erro desconhecido')
             app.logger.info('Browser Geolocation error:' + str(geoLocationStatus))
             return redirect('/')
 
-        #Se tiver probemas com a geolocalização ir para home
-        if geoLocationStatus==1 or geoLocationStatus==2:
+        # Se tiver probemas com a geolocalização ir para home
+        if geoLocationStatus == 1 or geoLocationStatus == 2:
             flash('Problema com a localização do navegador. Erro nº= %d!' % geoLocationStatus)
             app.logger.info('Browser Geoocation error: %d' % (geoLocationStatus))
             return redirect('/')
@@ -139,7 +138,7 @@ def tripInitializer():
         # Se não tem probemas com a localização, mandas as informações para o logger
         else:
             try:
-                app.logger.info('Recovering Address from coordinates: %f,%f'% (initialLatitude, initialLongitude))
+                app.logger.info('Recovering Address from coordinates: %f,%f' % (initialLatitude, initialLongitude))
             except:
                 try:
                     app.logger.info('Recovering Address from coordinates: %s,%s' % (initialLatitude, initialLongitude))
@@ -147,8 +146,6 @@ def tripInitializer():
                     app.logger.info('Coordinates invalid')
                     flash('Problema com a localização do navegador. Erro nº= %d!' % geoLocationStatus)
                     return redirect('/')
-
-
 
             # Salva endereço a partir das coordenadas
             initialAddress = helpers.reverseGeocode(initialLatitude, initialLongitude)
@@ -160,9 +157,9 @@ def tripInitializer():
 
             else:
 
-                currentTzName="America/Sao_Paulo"
+                currentTzName = "America/Sao_Paulo"
                 # cria a trip e sobe na DB
-                initiateTrip(initialAddress,currentTzName,nickname,request.form.get("cars"))
+                initiateTrip(initialAddress, currentTzName, nickname, request.form.get("cars"))
 
                 # Imprime mensagem
                 flash('Viagem Iniciada!')
@@ -170,12 +167,13 @@ def tripInitializer():
                 # Abre a home novamente
                 return redirect('/')
 
-    #Se usuario não logado voltar para home
+    # Se usuario não logado voltar para home
     else:
         flash('Você precisa estar logado para iniciar uma viagem!')
         return redirect('/')
 
-#Como copiar codigo da trip initializer para atualizar mensagens de erro?
+
+# Como copiar codigo da trip initializer para atualizar mensagens de erro?
 ## Mandar mensagem no grupo
 ### Send a WhatsApp Message to a Group instantly
 ###pywhatkit.sendwhatmsg_to_group_instantly("AB123CDEFGHijklmn", "Hey All!")
@@ -190,7 +188,6 @@ def tripEnder():
         finalLongitude = request.form.get('longitude')
         geoLocationStatus = request.form.get("geoLocationError")
 
-
         # Se não tiver informação do geoLocation voltar para home
         if geoLocationStatus == None or geoLocationStatus == "":
             flash('Problema com a localização do navegador. Erro desconhecido')
@@ -201,14 +198,14 @@ def tripEnder():
         endAddress = helpers.reverseGeocode(finalLatitude, finalLongitude)
 
         # Checa erro no geocodding
-        if isGeoCodingWorking(endAddress)==False:
+        if isGeoCodingWorking(endAddress) == False:
             flash('Geocoding Error. Try Again Later')
             return redirect('/')
 
         else:
             # Configura Timezone e encerra viagem
-            currentTzName="America/Sao_Paulo"
-            endTrip(currentTzName,request.form.get("cars"),endAddress.__str__())
+            currentTzName = "America/Sao_Paulo"
+            endTrip(currentTzName, request.form.get("cars"), endAddress.__str__())
             # Imprime mensagem e sobe no log
             app.logger.info('New Trip ended. %s' % endAddress)
             flash('Viagem Finalizada!')
@@ -232,7 +229,7 @@ def searchTrip():
 
         # Inicializa informações do usuario
         nickname = session['nickname_usuario_logado']
-        #Inicializa Formulario
+        # Inicializa Formulario
         form = formSearchTripByDate()
 
         # Inicializa carros liberados para usuario
@@ -245,10 +242,9 @@ def searchTrip():
 
         if flask.request.method == 'POST':
             # Inicializa formularios adequados
-            formAnterior=formSearchTripByDate(request.form)
+            formAnterior = formSearchTripByDate(request.form)
 
-
-            #Procura Viagens
+            # Procura Viagens
             # qry = DBSession.query(User).filter(User.birthday.between('1985-01-17', '1988-01-17'))
             trips = Trips.query.filter_by(carPlate=request.form.get("cars"), ).order_by(Trips.initialTime.desc())
             # retorna pagina home
@@ -265,3 +261,10 @@ def searchTrip():
     else:
         return redirect(url_for('login', proxima=url_for('index')))
 
+
+@app.route('/redirect-external/', methods=['GET', ])
+def redirectToWebsite():
+    url=request.args.get('url')
+    print ('url é '+ str(url))
+    # url='http://www.google.com'
+    return redirect(url)
