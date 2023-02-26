@@ -182,6 +182,9 @@ def endTrip(timeZoneName,carplate, endAddress):
     trip.endAddress = endAddress.__str__()
     trip.endTime = formattedDateTime
     db.session.commit()
+    #Loga e informa usuário
+    app.logger.info('New Trip ended. %s' % endAddress)
+
 
 def initiateTrip(initialAddress, timeZoneName,nickname,carplate):
     #formating dateTime
@@ -192,3 +195,13 @@ def initiateTrip(initialAddress, timeZoneName,nickname,carplate):
                  carPlate=carplate)
     db.session.add(trip)
     db.session.commit()
+    #Escreve no log
+    app.logger.info('New Trip Started. %s' % initialAddress)
+
+def isGeoCodingWorking(address):
+    if address.error != 0:
+        return False
+    else:
+        return True
+
+

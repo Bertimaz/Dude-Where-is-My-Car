@@ -164,8 +164,7 @@ def tripInitializer():
                 # cria a trip e sobe na DB
                 initiateTrip(initialAddress,currentTzName,nickname,request.form.get("cars"))
 
-                # Imprime mensagem e escreve no log
-                app.logger.info('New Trip Uploaded. %s' % initialAddress)
+                # Imprime mensagem
                 flash('Viagem Iniciada!')
 
                 # Abre a home novamente
@@ -191,7 +190,7 @@ def tripEnder():
         finalLongitude = request.form.get('longitude')
         geoLocationStatus = request.form.get("geoLocationError")
 
-        app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
+
         # Se não tiver informação do geoLocation voltar para home
         if geoLocationStatus == None or geoLocationStatus == "":
             flash('Problema com a localização do navegador. Erro desconhecido')
@@ -199,13 +198,10 @@ def tripEnder():
             return redirect('/')
 
         # Salva endereço a partir das coordenadas
-        print("latitude:%s longitude:%s", finalLatitude, finalLongitude)
         endAddress = helpers.reverseGeocode(finalLatitude, finalLongitude)
 
-
-
         # Checa erro no geocodding
-        if endAddress.error != 0:
+        if isGeoCodingWorking(endAddress)==False:
             flash('Geocoding Error. Try Again Later')
             return redirect('/')
 
