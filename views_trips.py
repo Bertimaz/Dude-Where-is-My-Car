@@ -123,6 +123,7 @@ def tripInitializer():
         initialLongitude = request.form.get('longitude')
 
         app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
+
         #Se não tiver informação do geoLocation voltar para home
         if geoLocationStatus==None or geoLocationStatus=="":
             flash('Problema com a localização do navegador. Erro desconhecido')

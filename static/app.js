@@ -14,7 +14,13 @@ $('form input[type="file"]').change(event => {
   }
 });
 
-navigator.geolocation.getCurrentPosition(showCoordinates, errors);
+const geoLocationOptions = {
+        timeout: 5000,
+        enableHighAccuracy: true,
+        maximumAge:0
+}
+
+navigator.geolocation.getCurrentPosition(showCoordinates, errors, geoLocationOptions);
 
 var htmlLatitude = document.getElementById("latitude");
 var htmlLongitude = document.getElementById("longitude");
@@ -22,9 +28,10 @@ var htmlGeoError = document.getElementById("geoLocationError");
 
 function getLocation() {
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showCoordinates, errors);
+        navigator.geolocation.getCurrentPosition(showCoordinates, errors, geoLocationOptions);
     } else {
        alert("Geolocation is not supported by this browser");
+       htmlGeoError.value="Geolocation is not supported by this browser"
     }
 }
 
@@ -33,18 +40,18 @@ function showCoordinates(myposition) {
 
     htmlLatitude.value=myposition.coords.latitude;
     htmlLongitude.value=myposition.coords.longitude;
-    geoLocationError.value=0;
+    htmlGeoError.value=0;
 
 
 }
 
 function errors(err){
     if(err.code==1){
-        geoLocationError.value=1;
+        htmlGeoError.value='ERROR ${err.code}: ${err.message}';
         alert("Libere o acesso a localização")
     }
     else{
-        geoLocationError.value=2;
+        htmlGeoError.value='ERROR ${err.code}: ${err.message}';
         alert("Geolocation error");
     }
 
