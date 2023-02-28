@@ -1,6 +1,6 @@
 import json
 
-import pywhatkit
+#import pywhatkit
 
 from carro_app import app
 from flask_wtf import FlaskForm

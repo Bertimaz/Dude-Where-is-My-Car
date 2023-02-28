@@ -1,12 +1,11 @@
 {% extends "template.html" %}
 {% block conteudo %}
 <a class="btn btn-primary" hidden href ="{{ url_for('login', proxima=url_for('index')) }}"> Login </a>
-     <div class="float-right">
-         <a  class="btn btn-primary" href ="{{ url_for('searchTrip') }}">Buscar Viagens</a>
+    <div class="float-right">
          <a>Logado como: {{nickname}}</a>
          <a  class="btn btn-danger" href ="{{ url_for('logout') }}"> Logout </a>
      </div>
-<div>
+    <div>
             <form class="" onsubmit="getLocation()" action="{{ url_for(action) }}" method="post" enctype="multipart/form-data">
                 <fieldset>
                       {{ form.csrf_token() }}
@@ -28,15 +27,13 @@
                     </div>
                     <a class="buttons" >
                         {{form.updateTrip(class = "btn btn-primary")}}
+
+                        <a class="btn btn-primary" href ="{{ url_for('searchTrip') }}" > Buscar Viagem </a>
+
                     </a>
                 </fieldset>
             </form>
         </div>
-<div>
-    <a hidden class="btn btn-primary" href ="{{ url_for('searchTrip') }}" > Buscar Viagem </a>
-</div>
-
-
 
         <table class="table  table-responsive ">
             <thead class="thead-dark">
