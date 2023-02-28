@@ -23,7 +23,6 @@
 <table class="table table-striped table-responsive table-bordered">
             <thead class="thead-default">
                 <tr>
-                    <th>Motorista</th>
                     <th>Endereço inicial</th>
                     <th>Inicio</th>
                     <th>Endereço final</th>
@@ -37,13 +36,12 @@
 
 
                 <tr>
-                    <td>{{trip.name}}</td>
-                    <td>{{trip.initialAddress}}</td>
-                    <td>{{trip.initialTime}}</td>
-                    <td>{{trip.endAddress}}</td>
-                    <td>{{trip.endTime}}</td>
-                    <td>{{trip.userNickname}}</td>
-                    <td>{{trip.carPlate}}</td>
+                    <td data-label="Endereço Inicial">{{trip.initialAddress}}</td>
+                    <td data-label="Saída">{{trip.initialTime}}</td>
+                    <td data-label="Endereço Final">{{trip.endAddress}}</td>
+                    <td data-label="Chegada">{{trip.endTime}}</td>
+                    <td data-label="Usuário">{{trip.userNickname}}</td>
+                    <td data-label="Placa">{{trip.carPlate}}</td>
 
                 </tr>
              {% endfor %}
