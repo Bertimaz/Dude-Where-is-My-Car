@@ -25,9 +25,9 @@ class Cars(db.Model):
 class Trips(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     initialAddress = db.Column(db.String(100), nullable=False)
-    initialTime = db.Column(db.String(30), nullable=False)
+    initialTime = db.Column(db.DateTime, nullable=False)
     endAddress = db.Column(db.String(100), nullable=True)
-    endTime = db.Column(db.String(30), nullable=True)
+    endTime = db.Column(db.DateTime, nullable=True)
     userNickname = db.Column(db.String(15), nullable=False)
     carPlate = db.Column(db.String(10), nullable=False)
 

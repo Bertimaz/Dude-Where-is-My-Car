@@ -1,5 +1,7 @@
 import json
 
+import pywhatkit
+
 from carro_app import app
 from flask_wtf import FlaskForm
 from wtforms import StringField, validators, SubmitField, SelectField, PasswordField
@@ -20,14 +22,14 @@ def isLastTripOpen(carPlate):
     return False
 
 
-def retrieveTripsByDateAndCar(carPlate,date):
+def retrieveTripsByDateAndCar(carPlate, date):
     pass
     # select *
     # from trips  WHERE
     # date(initialTime) = '2022-11-10'
     # and carPlate = 'FLI-4871'
 
-    #sqlStatement=text()
+    # sqlStatement=text()
 
 
 class FormularioEscolheCarro(FlaskForm):
@@ -112,8 +114,8 @@ class formEndTrip(FlaskForm):
 
 
 class formSearchTripByDate(FlaskForm):
+    date = StringField('Data', [validators.data_required(message='Data')])
     searchTrip = SubmitField('Buscar Viagem')
-
 
 
 class reverseGeocode():
@@ -121,7 +123,7 @@ class reverseGeocode():
         self.lat = lat
         self.longitude = longitude
         self.error = 0
-        self.formattedAddress = 'Endereço Indisponível'
+        self.formattedAddress = ''
         base = "https://maps.googleapis.com/maps/api/geocode/json?"
         params = "latlng={lat},{lon}&key={API_KEY}".format(
             lat=self.lat,
@@ -130,18 +132,18 @@ class reverseGeocode():
         )
 
         self.url = "{base}{params}".format(base=base, params=params)
-        app.logger.info('Connecting to %s.' %self.url)
+        app.logger.info('Connecting to %s.' % self.url)
 
         try:
             self.response = requests.get(self.url)
             # Se resposta ok salva o endereço
             if self.response.json()['status'] == 'OK':
-                app.logger.info('Connection to %s. Status: %s'%(self.url, self.response.json()['status']))
+                app.logger.info('Connection to %s. Status: %s' % (self.url, self.response.json()['status']))
                 #     do stuff
                 try:
                     self.formattedAddress = str(self.response.json()['results'][0]['formatted_address'])
                 except IndexError as e:
-                    app.logger.warning('Formating Address Error: %s' %e)
+                    app.logger.warning('Formating Address Error: %s' % e)
                     self.error = 2
                     self.formattedAddress = 'error2'
                 except:
@@ -149,11 +151,12 @@ class reverseGeocode():
                     self.error = 3
                     self.formattedAddress = 'error3'
             else:
-                app.logger.warning('Google Api Connection Error. Status: %s',self.response.json()['status'])
+                app.logger.warning('Google Api Connection Error. Error: %s', self.response.json()['status'])
+
         except requests.ConnectionError as e:
             self.error = 1
             self.formattedAddress = 'error1'
-            app.logger.warning('Google Api Connection Error. %s',e)
+            app.logger.warning('Google Api Connection Error. %s', e)
 
         finally:
             try:
@@ -165,6 +168,7 @@ class reverseGeocode():
     def __str__(self):
         return self.formattedAddress
 
+
 def isLogged(session):
     if 'nickname_usuario_logado' in session and session['nickname_usuario_logado'] is not None:
         return True
@@ -172,31 +176,32 @@ def isLogged(session):
         return False
 
 
-def endTrip(timeZoneName,carplate, endAddress):
+def endTrip(timeZoneName, carplate, endAddress):
     # Configura Timezone
     currentTz = pytz.timezone(timeZoneName)
-    #Formating Date Time
-    formattedDateTime=datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
+    # Formating Date Time
+    formattedDateTime = datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
     # recupera a trip adiciona informações finais e sobe na DB
     trip = Trips.query.filter_by(carPlate=carplate).order_by(Trips.initialTime.desc()).first()
     trip.endAddress = endAddress.__str__()
     trip.endTime = formattedDateTime
     db.session.commit()
-    #Loga e informa usuário
-    app.logger.info('New Trip ended. %s' % endAddress)
+    # Loga e informa usuário
+    app.logger.info('Trip ended. %s' % endAddress)
 
 
-def initiateTrip(initialAddress, timeZoneName,nickname,carplate):
-    #formating dateTime
+def initiateTrip(initialAddress, timeZoneName, nickname, carplate):
+    # formating dateTime
     currentTz = pytz.timezone(timeZoneName)
-    formattedDateTime=datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
-    #Creating new Trip and uploading to DB
+    formattedDateTime = datetime.now(currentTz).strftime("%Y-%m-%d %H:%M:%S")
+    # Creating new Trip and uploading to DB
     trip = Trips(initialAddress=initialAddress.__str__(), initialTime=formattedDateTime, userNickname=nickname,
                  carPlate=carplate)
     db.session.add(trip)
     db.session.commit()
-    #Escreve no log
-    app.logger.info('New Trip Started. %s' % initialAddress)
+    # Escreve no log
+    app.logger.info('Trip Started. %s' % initialAddress)
+
 
 def isGeoCodingWorking(address):
     if address.error != 0:
@@ -205,3 +210,7 @@ def isGeoCodingWorking(address):
         return True
 
 
+def sendWhatsAppMessage(groupName, message):
+    pywhatkit.sendwhatmsg_to_group_instantly("Dummy", "Oi")
+    pywhatkit.sendwhatmsg_to_group("Dummy", "message", 0, 0)
+    # pywhatkit.sendwhatmsg_to_group("AB123CDEFGHijklmn", "Hey All!", 0, 0)

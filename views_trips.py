@@ -1,10 +1,11 @@
 import flask
 from flask import render_template, request, redirect, session, flash, url_for, send_from_directory
+from sqlalchemy import func
 
 import config
 from carro_app import app
 from models import Trips, Users, Cars, UsersCars, db
-from datetime import datetime
+from datetime import datetime, date
 from helpers import *
 import googlemaps
 import time
@@ -50,7 +51,6 @@ def index():
             mapsLink = "redirect-external/?url=" + "https://www.google.com.br/maps/search/{address}".format(
                 address=trip.endAddress.replace("- ", "").replace(" ", "+")
             )
-            print('maps link= '+ mapsLink)
 
         driverName = Users.query.filter_by(nickname=trip.userNickname).first().name
 
@@ -121,7 +121,6 @@ def tripInitializer():
         initialLatitude = request.form.get('latitude')
         initialLongitude = request.form.get('longitude')
 
-        app.logger.info('Browser Geolocation Status:' + str(geoLocationStatus))
 
         # Se não tiver informação do geoLocation voltar para home
         if geoLocationStatus == None or geoLocationStatus == "":
@@ -201,7 +200,7 @@ def tripEnder():
         if isGeoCodingWorking(endAddress) == False:
             flash('Geocoding Error. Try Again Later')
             return redirect('/')
-
+        #Se geoconding funcionar salva informacoes
         else:
             # Configura Timezone e encerra viagem
             currentTzName = "America/Sao_Paulo"
@@ -220,9 +219,8 @@ def tripEnder():
 
 @app.route('/search-trip', methods=['GET', 'POST'])
 def searchTrip():
-    trip = Trips(id=1, initialAddress="Rua")
 
-    print(trip.initialAddress)
+
 
     # se usuario logado abre pagina home
     if isLogged(session):
@@ -244,17 +242,28 @@ def searchTrip():
             # Inicializa formularios adequados
             formAnterior = formSearchTripByDate(request.form)
 
-            # Procura Viagens
-            # qry = DBSession.query(User).filter(User.birthday.between('1985-01-17', '1988-01-17'))
-            trips = Trips.query.filter_by(carPlate=request.form.get("cars"), ).order_by(Trips.initialTime.desc())
-            # retorna pagina home
-            return render_template('searchTrip.html', form=form, cars=cars, trips=trips)
+
+
+            #salva informação do formulario e transoforma em date
+            tripDate= (request.form.get('tripDate'))
+            tripDate= datetime.strptime(tripDate,'%Y-%m-%d').date()
+            carPlate=request.form.get('cars')
+
+
+
+
+            #Procura todas as viagens da data selecionado Falta selecionar o carro
+            trips = Trips.query.filter(func.DATE(Trips.initialTime) == tripDate, Trips.carPlate == carPlate).all()
+
+
+            # retorna pagina com informações
+            return render_template('searchTrip.html', titulo='Busca de Viagens', form=form, cars=cars, trips=trips)
         else:
             # retorna pagina home
-            return render_template('searchTrip.html', form=form, cars=cars)
-
-        # retorna pagina home
-
+            return render_template('searchTrip.html',titulo='Busca de Viagens', form=form, cars=cars)
+    #
+    # return render_template('home.html', titulo='Viagens', trip=trip, user=user, carTrip=carTrip, cars=cars,
+    #                        form=form, action=action)
 
 
     # Caso Contrario vai para login

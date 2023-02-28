@@ -16,7 +16,7 @@ $('form input[type="file"]').change(event => {
 
 const geoLocationOptions = {
         timeout: 5000,
-        enableHighAccuracy: true,
+        enableHighAccuracy: false,
         maximumAge:0
 }
 
@@ -52,7 +52,7 @@ function errors(err){
     }
     else{
         htmlGeoError.value='ERROR ${err.code}: ${err.message}';
-        alert("Geolocation error");
+        alert("Geolocation Unknown error");
     }
 
     }
