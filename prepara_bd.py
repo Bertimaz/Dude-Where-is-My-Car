@@ -40,9 +40,9 @@ TABLES['Trips'] = ('''
       CREATE TABLE `trips` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `initialAddress` varchar(100) NOT NULL,
-      `initialTime` varchar(30) NOT NULL,
+      `initialTime` DATETIME NOT NULL,
       `endAddress` varchar(100),
-      `endTime` varchar(30),
+      `endTime` DATETIME,
       `userNickname` varchar(15) NOT NULL,
       `carPlate` varchar(10) NOT NULL,
 
